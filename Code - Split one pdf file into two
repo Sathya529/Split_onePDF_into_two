@@ -1,7 +1,9 @@
+#importing libraries
 import os
 from tkinter import Tk, filedialog, messagebox, Label, Button
 from spire.pdf import PdfDocument
 
+#creating functions
 def select_folder():
     """Open a dialog to select a folder."""
     folder_path = filedialog.askdirectory()
