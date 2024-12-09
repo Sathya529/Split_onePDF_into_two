@@ -1,1 +1,86 @@
+import os
+from tkinter import Tk, filedialog, messagebox, Label, Button
+from spire.pdf import PdfDocument
+
+def select_folder():
+    """Open a dialog to select a folder."""
+    folder_path = filedialog.askdirectory()
+    if folder_path:
+        selected_folder_label.config(text=f"Folder: {folder_path}")
+        global selected_folder
+        selected_folder = folder_path
+
+def select_file():
+    """Open a dialog to select a PDF file."""
+    file_path = filedialog.askopenfilename(
+        filetypes=[("PDF Files", "*.pdf")],
+        title="Select a PDF File"
+    )
+    if file_path:
+        selected_file_label.config(text=f"File: {os.path.basename(file_path)}")
+        global selected_file
+        selected_file = file_path
+
+def split_pdf():
+    """Split the selected PDF into two parts."""
+    try:
+        if not selected_folder or not selected_file:
+            raise ValueError("Please select both a folder and a PDF file.")
+
+        pdf = PdfDocument()
+        pdf.LoadFromFile(selected_file)
+
+        # Create two new PDF documents
+        new_pdf_1 = PdfDocument()
+        new_pdf_2 = PdfDocument()
+
+        # Split the PDF into two parts
+        split_index = 3  # Change this value as per your requirement
+        new_pdf_1.InsertPageRange(pdf, 0, split_index - 1)
+        new_pdf_2.InsertPageRange(pdf, split_index, pdf.Pages.Count - 1)
+
+        # Save the split PDFs
+        output_file_1 = os.path.join(selected_folder, "SplitByPageRange-1.pdf")
+        output_file_2 = os.path.join(selected_folder, "SplitByPageRange-2.pdf")
+        new_pdf_1.SaveToFile(output_file_1)
+        new_pdf_2.SaveToFile(output_file_2)
+
+        # Close PDF objects
+        pdf.Close()
+        new_pdf_1.Close()
+        new_pdf_2.Close()
+
+        # Notify the user
+        messagebox.showinfo("Success", f"PDF split successfully.\n\nSaved at:\n{output_file_1}\n{output_file_2}")
+
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
+
+# Initialize Tkinter application
+root = Tk()
+root.title("PDF Splitter")
+root.geometry("500x400")
+root.maxsize(800, 700)
+root.resizable(True,False)
+root.configure(bg='white')
+
+# Global variables to store the folder and file path
+selected_folder = None
+selected_file = None
+
+# UI Components
+Label(root, text="PDF Splitter", font=("Arial", 26, "bold")).pack(pady=20)
+
+Button(root, text="Select Folder", command=select_folder, width=25).pack(pady=15)
+selected_folder_label = Label(root, text="Folder: Not Selected", fg="gray")
+selected_folder_label.pack()
+
+Button(root, text="Select PDF File", command=select_file, width=25).pack(pady=15)
+selected_file_label = Label(root, text="File: Not Selected", fg="gray")
+selected_file_label.pack()
+
+Button(root, text="Split PDF", command=split_pdf, width=25, bg="green", fg="white").pack(pady=20)
+
+# Start the Tkinter event loop
+root.mainloop()
 
